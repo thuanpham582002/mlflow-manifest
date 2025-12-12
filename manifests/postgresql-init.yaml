@@ -1,0 +1,29 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: postgres-init
+  namespace: mlflow
+  labels:
+    app: postgres-init
+spec:
+  template:
+    metadata:
+      labels:
+        app: postgres-init
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: postgres-init
+        image: postgres:15-alpine
+        command:
+        - sh
+        - -c
+        - |
+          until pg_isready -h postgresql -p 5432 -U mlflow; do
+            echo "Waiting for PostgreSQL..."
+            sleep 2
+          done
+          echo "PostgreSQL is ready!"
+        env:
+        - name: PGPASSWORD
+          value: "password"

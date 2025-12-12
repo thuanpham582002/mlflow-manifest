@@ -64,8 +64,19 @@ helm install mlflow ./helm-mlflow \
 For direct deployment with `kubectl`, use the manifests in the `manifests/` directory:
 
 ```bash
-# Deploy with manifests
-kubectl apply -f manifests/
+# Deploy with PostgreSQL first
+kubectl apply -f manifests/postgresql-pvc.yaml
+kubectl apply -f manifests/postgresql-service.yaml
+kubectl apply -f manifests/postgresql-deployment.yaml
+
+# Wait for PostgreSQL to be ready
+kubectl wait --for=condition=ready pod -l app=postgresql -n mlflow --timeout=120s
+
+# Deploy MLflow
+kubectl apply -f manifests/deployment.yaml
+kubectl apply -f manifests/service.yaml
+kubectl apply -f manifests/configmap.yaml
+kubectl apply -f manifests/secrets.yaml
 
 # Check deployment status
 kubectl get pods -n mlflow
@@ -79,6 +90,12 @@ kubectl port-forward -n mlflow svc/mlflow-service 5000:5000
 - `mlflow-secrets`: Database credentials
 - `mlflow-minio-secrets`: MinIO/S3 credentials
 
+**PostgreSQL Setup**: The manifests include a PostgreSQL deployment with:
+- Database: `mlflow`
+- User: `mlflow`
+- Password: `password` (update as needed)
+- Storage: 5Gi persistent volume
+
 For detailed configuration options, see the [CETIC MLflow documentation](./helm-mlflow/README.md).
 
 ## Repository Structure
@@ -86,12 +103,17 @@ For detailed configuration options, see the [CETIC MLflow documentation](./helm-
 ```
 mlflow-manifest/
 ├── README.md                 # This file
+├── Dockerfile               # Custom MLflow image with dependencies
 ├── manifests/               # Kubernetes manifests
 │   ├── deployment.yaml      # MLflow deployment (exact match)
 │   ├── configmap.yaml       # Configuration
 │   ├── secrets.yaml         # Database and MinIO secrets
 │   ├── service.yaml         # ClusterIP service
-│   └── namespace.yaml       # mlflow namespace
+│   ├── namespace.yaml       # mlflow namespace
+│   ├── postgresql-deployment.yaml  # PostgreSQL database
+│   ├── postgresql-service.yaml     # PostgreSQL service
+│   ├── postgresql-pvc.yaml         # PostgreSQL storage
+│   └── postgresql-init.yaml        # Database initialization
 └── helm-mlflow/             # MLflow Helm chart
     ├── Chart.yaml           # Chart metadata
     ├── values.yaml          # Default configuration values
