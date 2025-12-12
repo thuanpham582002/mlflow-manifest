@@ -11,4 +11,4 @@ spec:
   resources:
     requests:
       storage: 5Gi
-  storageClassName: standard # Adjust based on your cluster
+  # storageClassName: # Use default storage class
