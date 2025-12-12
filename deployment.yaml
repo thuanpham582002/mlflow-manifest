@@ -17,13 +17,13 @@ spec:
     spec:
       containers:
         - name: mlflow
-          image: python:3.11-slim
+          image: ghcr.io/mlflow/mlflow:2.20.1
           ports:
             - containerPort: 5000
           command: ["/bin/bash", "-c"]
           args:
             - >
-              pip install --no-cache-dir "mlflow[extras]==2.14.0" psycopg2-binary boto3 &&
+              pip install --no-cache-dir psycopg2-binary &&
               mlflow server
               --backend-store-uri ${MLFLOW_BACKEND_STORE_URI}
               --default-artifact-root ${MLFLOW_DEFAULT_ARTIFACT_ROOT}
