@@ -15,17 +15,15 @@ spec:
       labels:
         app: mlflow
     spec:
-      imagePullSecrets:
-        - name: registry-secret
       containers:
         - name: mlflow
-          image: 10.24.10.11:30500/mlflow/mlflow:v3.5.0
+          image: python:3.11-slim
           ports:
             - containerPort: 5000
           command: ["/bin/bash", "-c"]
           args:
             - >
-              pip install --no-cache-dir psycopg2-binary boto3 &&
+              pip install --no-cache-dir "mlflow[extras]==2.14.0" psycopg2-binary boto3 &&
               mlflow server
               --backend-store-uri ${MLFLOW_BACKEND_STORE_URI}
               --default-artifact-root ${MLFLOW_DEFAULT_ARTIFACT_ROOT}
