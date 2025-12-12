@@ -1,8 +1,8 @@
 replicaCount: 1
 
 image:
-  repository: ghcr.io/mlflow/mlflow
-  tag: latest
+  repository: ghcr.io/thuanpham582002/mlflow
+  tag: v3.5.0
   pullPolicy: IfNotPresent
 
 default_artifact_root: "s3://datalake/mlflow/artifacts"
@@ -52,17 +52,26 @@ ingress:
   hosts: [mlflow.test]
   path: /
 
-resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
+resources:
+  limits:
+    cpu: 500m
+    memory: 1Gi
+  requests:
+    cpu: 250m
+    memory: 512Mi
+
+# Environment variables matching your deployment
+extraEnv:
+  - name: MLFLOW_SERVER_HOST
+    value: "0.0.0.0"
+  - name: MLFLOW_SERVER_PORT
+    value: "5000"
+  - name: MLFLOW_S3_ENDPOINT_URL
+    value: "http://10.24.10.11:30900"
+  - name: MLFLOW_S3_IGNORE_TLS
+    value: "true"
+  - name: AWS_DEFAULT_REGION
+    value: "us-east-1"
 
 # volumes:
 #   - name: minio
