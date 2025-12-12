@@ -19,6 +19,6 @@ maintainers:
     url: https://github.com/fzalila
 dependencies:
   - name: postgresql
-    version: ~10.3.6
+    version: 18.1.13
     repository: https://charts.bitnami.com/bitnami
     condition: db.default.enabled
