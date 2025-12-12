@@ -5,8 +5,11 @@ This repository contains a Helm chart for deploying MLflow on Kubernetes.
 ## TLDR
 
 ```bash
-# Install MLflow
+# Option 1: Deploy with Helm Chart (Recommended)
 helm install mlflow ./helm-mlflow
+
+# Option 2: Deploy with Kubernetes manifests
+kubectl apply -f manifests/
 
 # Upgrade MLflow with interactive values
 helm upgrade -i mlflow ./helm-mlflow
@@ -56,6 +59,26 @@ helm install mlflow ./helm-mlflow \
   --set db.password=mypassword
 ```
 
+### Option 2: Kubernetes Manifests
+
+For direct deployment with `kubectl`, use the manifests in the `manifests/` directory:
+
+```bash
+# Deploy with manifests
+kubectl apply -f manifests/
+
+# Check deployment status
+kubectl get pods -n mlflow
+kubectl get svc -n mlflow
+
+# Forward port to access MLflow
+kubectl port-forward -n mlflow svc/mlflow-service 5000:5000
+```
+
+**Note**: Before deploying with manifests, update the following secrets with your actual values:
+- `mlflow-secrets`: Database credentials
+- `mlflow-minio-secrets`: MinIO/S3 credentials
+
 For detailed configuration options, see the [CETIC MLflow documentation](./helm-mlflow/README.md).
 
 ## Repository Structure
@@ -63,6 +86,12 @@ For detailed configuration options, see the [CETIC MLflow documentation](./helm-
 ```
 mlflow-manifest/
 ├── README.md                 # This file
+├── manifests/               # Kubernetes manifests
+│   ├── deployment.yaml      # MLflow deployment (exact match)
+│   ├── configmap.yaml       # Configuration
+│   ├── secrets.yaml         # Database and MinIO secrets
+│   ├── service.yaml         # ClusterIP service
+│   └── namespace.yaml       # mlflow namespace
 └── helm-mlflow/             # MLflow Helm chart
     ├── Chart.yaml           # Chart metadata
     ├── values.yaml          # Default configuration values
