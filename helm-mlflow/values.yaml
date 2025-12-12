@@ -1,7 +1,7 @@
 replicaCount: 1
 
 image:
-  repository: bitnami/mlflow
+  repository: ghcr.io/mlflow/mlflow
   tag: latest
   pullPolicy: IfNotPresent
 
