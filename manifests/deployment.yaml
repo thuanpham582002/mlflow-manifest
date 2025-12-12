@@ -15,8 +15,6 @@ spec:
       labels:
         app: mlflow
     spec:
-      imagePullSecrets:
-        - name: registry-secret
       containers:
         - name: mlflow
           image: ghcr.io/thuanpham582002/mlflow:v3.5.0
