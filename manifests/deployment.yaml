@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: mlflow
-          image: ghcr.io/thuanpham582002/mlflow:v3.5.1
+          image: ghcr.io/thuanpham582002/mlflow:v3.5.2-amd64
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5000

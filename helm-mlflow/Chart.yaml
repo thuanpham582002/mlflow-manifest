@@ -3,7 +3,7 @@ name: mlflow
 description: A Helm chart for MLFlow
 type: application
 version: 1.5.1
-appVersion: 3.5.1
+appVersion: 3.5.2-amd64
 keywords:
   - mlflow
 home: https://mlflow.org/
