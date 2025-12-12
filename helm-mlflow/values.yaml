@@ -2,7 +2,7 @@ replicaCount: 1
 
 image:
   repository: ghcr.io/thuanpham582002/mlflow
-  tag: v3.5.0
+  tag: v3.5.1
   pullPolicy: IfNotPresent
 
 default_artifact_root: "s3://datalake/mlflow/artifacts"

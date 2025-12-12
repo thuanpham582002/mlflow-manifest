@@ -17,21 +17,11 @@ spec:
     spec:
       containers:
         - name: mlflow
-          image: ghcr.io/thuanpham582002/mlflow:v3.5.0
+          image: ghcr.io/thuanpham582002/mlflow:v3.5.1
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5000
               protocol: TCP
-          command: ["/bin/bash", "-c"]
-          args:
-            - >
-              pip install --no-cache-dir psycopg2-binary boto3 &&
-              mlflow server
-              --backend-store-uri ${MLFLOW_BACKEND_STORE_URI}
-              --default-artifact-root ${MLFLOW_DEFAULT_ARTIFACT_ROOT}
-              --host 0.0.0.0
-              --port 5000
-              --serve-artifacts
           env:
             - name: MLFLOW_BACKEND_STORE_URI
               valueFrom:
@@ -78,19 +68,19 @@ spec:
               cpu: "500m"
           livenessProbe:
             httpGet:
-              path: /health
+              path: /
               port: 5000
             failureThreshold: 3
-            initialDelaySeconds: 30
+            initialDelaySeconds: 60
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 5
           readinessProbe:
             httpGet:
-              path: /health
+              path: /
               port: 5000
-            failureThreshold: 6
-            initialDelaySeconds: 10
+            failureThreshold: 3
+            initialDelaySeconds: 30
             periodSeconds: 5
             successThreshold: 1
             timeoutSeconds: 3
