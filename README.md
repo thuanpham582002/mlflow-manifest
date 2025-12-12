@@ -1,160 +1,75 @@
-# MLflow Backend Kubernetes Manifests
+# MLflow Kubernetes Deployment
 
-This repository contains Kubernetes manifests for deploying MLflow backend with PostgreSQL database and MinIO object storage.
+This repository contains a Helm chart for deploying MLflow on Kubernetes.
 
-## Architecture
+## TLDR
 
-The deployment includes:
-- **MLflow Backend** - Main MLflow tracking server
-- **PostgreSQL** - Database for MLflow metadata
-- **MinIO** - Object storage for MLflow artifacts (existing)
+```bash
+# Install MLflow
+helm install mlflow ./helm-mlflow
 
-## Components
+# Upgrade MLflow with interactive values
+helm upgrade -i mlflow ./helm-mlflow
+```
 
-### Namespace
-- `mlflow` - Dedicated namespace for MLflow components
+## About
 
-### Services
-- **mlflow-service** (ClusterIP) - Internal access to MLflow API on port 5000
+This repository uses the [CETIC MLflow Helm Chart](https://github.com/cetic/helm-mlflow), a well-maintained Helm chart for deploying MLflow on Kubernetes.
 
-### Deployments
-- **mlflow** - MLflow tracking server with database and MinIO integration
+### Features
+
+- MLflow tracking server
+- PostgreSQL/MySQL database backend support
+- MinIO S3-compatible artifact storage
+- Configurable service types (NodePort, LoadBalancer, Ingress)
+- Kubernetes-native deployment
+
+## Installation
+
+### Prerequisites
+
+- Kubernetes cluster 1.10+
+- Helm 3.0+
+- PV provisioner support in the underlying infrastructure
+
+### Quick Install
+
+```bash
+# Clone this repository
+git clone https://github.com/thuanpham582002/mlflow-manifest.git
+cd mlflow-manifest
+
+# Install MLflow
+helm install mlflow ./helm-mlflow
+```
 
 ### Configuration
-- **mlflow-config** - Configuration for backend database and MinIO storage
-- **mlflow-secrets** - Database credentials
-- **mlflow-minio-secrets** - MinIO access credentials
 
-### Database Setup
-- **postgresql-mlflow-setup** - Job to initialize PostgreSQL database
+The chart can be configured by editing the `./helm-mlflow/values.yaml` file or using `--set` flags:
 
-### RBAC
-- **mlflow-secret-reader** - Role for reading secrets
-- **mlflow-secret-reader-binding** - Role binding for MLflow pod
-
-## Deployment
-
-### Apply with Kustomize
 ```bash
-# Deploy MLflow backend
-kubectl apply -k .
-
-# Check deployment status
-kubectl get pods -n mlflow
-kubectl get svc -n mlflow
-
-# Check MLflow logs
-kubectl logs -n mlflow deployment/mlflow -f
+# Example with custom database configuration
+helm install mlflow ./helm-mlflow \
+  --set db.default.enabled=true \
+  --set db.type=postgresql \
+  --set db.user=myuser \
+  --set db.password=mypassword
 ```
 
-## Accessing MLflow
+For detailed configuration options, see the [CETIC MLflow documentation](./helm-mlflow/README.md).
 
-### Internal Access
-- **MLflow API**: `mlflow-service.mlflow.svc.cluster.local:5000`
+## Repository Structure
 
-### External Access Options
-
-Since only ClusterIP services are configured, use one of these methods:
-
-1. **Port Forwarding** (recommended for temporary access):
-```bash
-kubectl port-forward -n mlflow svc/mlflow-service 5000:5000
-# Access MLflow at http://localhost:5000
+```
+mlflow-manifest/
+├── README.md                 # This file
+└── helm-mlflow/             # MLflow Helm chart
+    ├── Chart.yaml           # Chart metadata
+    ├── values.yaml          # Default configuration values
+    ├── templates/           # Kubernetes templates
+    └── README.md           # Detailed chart documentation
 ```
 
-2. **LoadBalancer Service** (if your cluster supports it):
-```bash
-kubectl patch svc mlflow-service -n mlflow -p '{"spec":{"type":"LoadBalancer"}}'
-```
+## Support
 
-3. **Ingress Controller** (manual setup):
-Create your own Ingress resource to route traffic to the ClusterIP service
-
-## Configuration
-
-### Environment Variables
-The MLflow deployment is configured with:
-
-```yaml
-BACKEND_STORE_URI: postgresql+psycopg2://mlflow:password@postgresql:5432/mlflow
-DEFAULT_ARTIFACT_ROOT: s3://mlflow/
-MLFLOW_S3_ENDPOINT_URL: http://minio-service.minio:9000
-AWS_ACCESS_KEY_ID: <from-secret>
-AWS_SECRET_ACCESS_KEY: <from-secret>
-```
-
-### Required Secrets
-Update the following secrets before deployment:
-
-1. **mlflow-secrets**:
-   - `DATABASE_URL`: PostgreSQL connection string
-   - `POSTGRES_USER`: Database username
-   - `POSTGRES_PASSWORD`: Database password
-
-2. **mlflow-minio-secrets**:
-   - `MINIO_ACCESS_KEY`: MinIO access key
-   - `MINIO_SECRET_KEY`: MinIO secret key
-
-3. **pg-superuser**:
-   - `POSTGRES_PASSWORD`: PostgreSQL superuser password
-
-## Prerequisites
-
-1. **PostgreSQL**: The manifests assume an existing PostgreSQL deployment
-2. **MinIO**: The manifests assume an existing MinIO deployment in `minio` namespace
-
-## Monitoring and Maintenance
-
-### Health Checks
-- MLflow service includes liveness and readiness probes
-- Database connectivity is validated during startup
-
-### Logs
-```bash
-# MLflow logs
-kubectl logs -n mlflow deployment/mlflow -f
-
-# Database setup job logs
-kubectl logs -n mlflow job/postgresql-mlflow-setup -f
-```
-
-### Scaling
-To scale MLflow horizontally, update the replica count in the deployment:
-```bash
-kubectl scale deployment mlflow --replicas=3 -n mlflow
-```
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Database Connection Failed**
-   - Verify PostgreSQL is running and accessible
-   - Check database credentials in secrets
-   - Verify network connectivity between namespaces
-
-2. **MinIO Connection Failed**
-   - Verify MinIO is running and accessible
-   - Check MinIO credentials in secrets
-   - Verify bucket exists and permissions are correct
-
-3. **Pod Startup Issues**
-   - Check pod events: `kubectl describe pod -n mlflow`
-   - Check logs: `kubectl logs -n mlflow deployment/mlflow`
-
-### Cleanup
-```bash
-# Remove MLflow deployment
-kubectl delete -k .
-
-# Remove namespace (only if empty)
-kubectl delete namespace mlflow
-```
-
-## Notes
-
-- This deployment uses only ClusterIP services for security
-- No external exposure is configured by default
-- PostgreSQL and MinIO should be deployed separately
-- Database is automatically initialized on first deployment
-- All secrets should be updated with production values before use
+For issues and questions related to the Helm chart itself, please refer to the [upstream repository](https://github.com/cetic/helm-mlflow).
